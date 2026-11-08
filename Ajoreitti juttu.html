@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1e5843">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ajoreitti">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231e5843'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle'%3E%F0%9F%9A%90%3C/text%3E%3C/svg%3E">
+<title>Ajoreitti</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f3ee;--card:#fff;--ink:#1d2722;--muted:#69736d;--green:#1e5843;--green2:#2b7a5c;--pink:#d94f77;--line:#e3ddd3;--warn:#a8650f;--warnbg:#fdf3e2;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Figtree,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);-webkit-text-size-adjust:100%}
+header{background:var(--green);color:#fff;padding:18px 16px 16px}
+header .in{max-width:640px;margin:0 auto}
+header h1{margin:0;font-size:23px;font-weight:800;letter-spacing:-.01em}
+header p{margin:4px 0 0;opacity:.82;font-size:14px}
+main{max-width:640px;margin:0 auto;padding:12px 12px 90px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.lbl{font-size:13px;color:var(--muted);font-weight:700;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
+.row{display:flex;gap:8px;align-items:center}
+.wrap{flex-wrap:wrap}
+input[type=text],input[type=tel],input[type=password]{flex:1;min-width:0;font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+input:focus{outline:2px solid var(--green2);outline-offset:0}
+button,.btn{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:11px 14px;font-weight:700;font-size:15px;background:#ece6dc;color:var(--ink);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+button.primary,.btn.primary{background:var(--pink);color:#fff}
+button.go,.btn.go{background:var(--green2);color:#fff}
+button:disabled{opacity:.45;cursor:default}
+.big{width:100%;padding:18px;font-size:18px;border-radius:14px}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.chip{background:#e8f1ec;color:var(--green);padding:8px 12px;font-size:14px;border-radius:999px;border:1px solid #cfe2d7}
+.chip.on{background:var(--green2);color:#fff;border-color:var(--green2)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#efe9df;padding:4px;border-radius:12px}
+.seg3{grid-template-columns:1fr}
+@media(min-width:520px){.seg3{grid-template-columns:1fr 1fr 1fr}}
+.seg button{background:transparent;padding:11px 8px;font-size:15px;white-space:normal;line-height:1.2}
+.seg button.on{background:#fff;color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.seg button:disabled{opacity:.4}
+.toggle{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:15px;cursor:pointer;user-select:none}
+.toggle input{width:20px;height:20px;accent-color:var(--green2)}
+.banner{background:var(--warnbg);color:#6b430b;border:1px solid #f0d9b0;border-radius:var(--r);padding:12px 14px;margin-bottom:12px;font-size:14px;line-height:1.45}
+.hidden{display:none!important}
+.addrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+.hint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.4}
+/* map */
+.stats{display:flex;gap:16px;margin:2px 0 10px;font-size:14px;color:var(--muted)}
+.stats b{color:var(--ink);font-size:18px;display:block}
+/* stops */
+.stop{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:12px 0;border-top:1px solid var(--line);background:var(--card);transition:transform .16s ease;position:relative}
+.grip{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;padding:2px 0 10px;border-radius:10px}
+.grip .dots{color:#a6aea9;font-size:18px;line-height:1;letter-spacing:-1px}
+.stop.dragging{transition:none;z-index:5;box-shadow:0 10px 28px rgba(20,40,30,.22);border-radius:12px;border-top-color:transparent}
+.stop.dragging .grip{cursor:grabbing}
+.stop.dragging .num{background:var(--pink)}
+body.is-dragging{user-select:none;-webkit-user-select:none}
+.stop:first-child{border-top:none}
+.num{width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.stop.done .num{background:#b9c2bc}
+.stop.done .body{opacity:.55}
+.stop.done .addr{text-decoration:line-through}
+.name{font-weight:700;font-size:16px}
+.addr{font-size:15px;margin-top:1px}
+.note{font-size:13px;color:#5b4a1c;background:#fbf4dc;border-radius:8px;padding:5px 8px;margin-top:6px;display:inline-block}
+.meta{font-size:13px;color:var(--muted);margin-top:4px}
+.meta a{color:var(--green2)}
+.lowconf{font-size:12px;color:var(--warn);font-weight:700;margin-top:4px}
+.actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+.actions button,.actions .btn{padding:8px 11px;font-size:14px}
+.reading{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:15px}
+.spin{width:18px;height:18px;border-radius:50%;border:3px solid #d8e3dc;border-top-color:var(--green2);animation:s 0.9s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.err{color:#9b2c2c;font-size:14px}
+.body{position:relative;padding-right:40px;min-width:0}
+.kebab{position:absolute;top:-6px;right:-2px;width:40px;height:40px;padding:0;background:transparent;font-size:22px;color:var(--muted);border-radius:50%}
+.kebab:active,.kebab[aria-expanded=true]{background:#ece6dc}
+.menu{position:absolute;top:34px;right:0;z-index:8;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(20,40,30,.18);padding:6px;min-width:210px;display:flex;flex-direction:column}
+.menu button{background:transparent;justify-content:flex-start;padding:12px 12px;font-weight:600;border-radius:8px;font-size:15px}
+.menu button:active{background:#f1ece4}
+.menu .danger{color:#b4232f}
+.actions .btn,.actions button{flex:1;padding:12px;font-size:15px}
+.details{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:8px 0 0;font-size:14px;background:#f6f3ee;border-radius:8px;padding:8px 10px}
+.details dt{color:var(--muted);font-weight:600}
+.details dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.thumb{cursor:zoom-in;width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid var(--line);float:right;margin-left:8px}
+.legs{display:flex;flex-direction:column;gap:8px}
+.empty{color:var(--muted);text-align:center;padding:18px 6px;font-size:15px}
+.footbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+/* overlay */
+.ov{position:fixed;inset:0;background:rgba(20,30,25,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:#fff;width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:18px 16px 22px;max-height:92vh;overflow:auto}
+@media(min-width:600px){.ov{align-items:center}.sheet{border-radius:18px}}
+.sheet h2{margin:0 0 12px;font-size:19px}
+.field{margin-bottom:10px}
+.field input{width:100%}
+.sheet .row{justify-content:flex-end;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:30;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.spin.sm{display:inline-block;width:12px;height:12px;border-width:2px;vertical-align:-1px}
+textarea{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;resize:vertical}
+header .in{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.gear{background:rgba(255,255,255,.14);color:#fff;font-size:20px;width:44px;height:44px;padding:0;border-radius:12px}
+.mode{font-size:13px;color:var(--muted);margin:-2px 0 12px;line-height:1.45}
+.linkbtn{background:none;padding:0;color:var(--green2);font-size:13px;font-weight:700;text-decoration:underline}
+.addrow3{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.raw{margin-top:10px;font-size:13px}.raw summary{cursor:pointer;color:var(--green2);font-weight:700}
+.raw pre{white-space:pre-wrap;background:#f6f3ee;border-radius:8px;padding:10px;max-height:220px;overflow:auto;font-size:12.5px}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <div><h1>🚐 Ajoreitti</h1><p>Kuvaa osoitekortit, niin sovellus järjestää ajoreitin.</p></div>
+  <button class="gear" id="settingsBtn" aria-label="Asetukset">⚙</button>
+</div></header>
+
+<main>
+  <section class="panel">
+    <label class="lbl" for="startInput">Mistä reitti alkaa?</label>
+    <div class="row">
+      <input type="text" id="startInput" placeholder="Kirjoita osoite" autocomplete="off">
+      <button id="startSave">Tallenna</button>
+    </div>
+    <div class="chips"><button type="button" class="chip" id="gpsChip">📍 Oma sijainti</button></div>
+    <div id="startInfo" class="hint"></div>
+
+    <label class="lbl" for="endInput" style="margin-top:18px">Mihin reitti päättyy?</label>
+    <div class="row">
+      <input type="text" id="endInput" placeholder="Kirjoita osoite (valinnainen)" autocomplete="off">
+      <button id="endSave">Tallenna</button>
+    </div>
+    <div id="endInfo" class="hint"></div>
+  </section>
+
+  <section class="panel">
+    <div class="mode" id="modeBanner"></div>
+    <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+    <button class="primary big" id="pickBtn">📷 Kuvaa tai valitse osoitekortit</button>
+    <div class="addrow3">
+      <button id="pasteBtn">📋 Liitä teksti</button>
+      <button id="manualBtn">＋ Kirjoita käsin</button>
+    </div>
+    <div class="hint" style="text-align:right"><button class="linkbtn" id="clearBtn">Tyhjennä kaikki pysähdykset</button></div>
+  </section>
+
+  <section class="panel">
+    <div class="row" style="justify-content:space-between;margin-bottom:8px">
+      <span class="lbl" style="margin:0">Pysähdykset</span>
+      <button class="go" id="optBtn">↻ Järjestä reitti</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div id="list"></div>
+  </section>
+
+  <section class="panel">
+    <span class="lbl">Aja Google Mapsilla</span>
+    <div class="legs" id="legs"></div>
+    <div class="hint" id="legHint"></div>
+    <div class="footbtns" style="margin-top:10px"><button id="copyBtn">Kopioi osoitelista</button></div>
+  </section>
+  <p class="hint" style="text-align:center">Osoitteet: © OpenStreetMap-tekijät · Ajomatkat: OSRM</p>
+</main>
+
+<div id="ov" class="ov hidden"><div class="sheet" id="sheet"></div></div>
+<div id="toast" class="toast"></div>
+<script>
+(function(){
+'use strict';
+/* =====================================================================
+   Ajoreitti – itsenäinen versio (GitHub Pages)
+   - Kortit: puhelimessa toimiva tekstintunnistus (Tesseract.js) TAI
+     valinnaisesti Claude API omalla avaimella
+   - Osoitteet kartalle: OpenStreetMap Nominatim
+   - Ajomatkat: OSRM (varalla linnuntie)
+   ===================================================================== */
+const KEY='ajoreitti.v1', KEY_API='ajoreitti.apikey';
+const GPS_TEXT='Oma sijainti';
+const isGpsText=t=>/^\s*(oma sijainti|nykyinen sijainti|sijaintini)\s*$/i.test(t||'');
+const AI_MODEL='claude-sonnet-5-5';
+
+let state={start:null,end:null,stops:[]};
+let openMenu=null, uid=Date.now(), gpsPos=null, routeInfo=null, optimizing=false;
+const imgs=new Map();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const hasXY=s=>s&&typeof s.lat==='number'&&typeof s.lon==='number'&&isFinite(s.lat)&&isFinite(s.lon);
+function addrText(s){const pc=[s.postcode,s.city].filter(Boolean).join(' ');return [s.street,pc].filter(Boolean).join(', ');}
+function hav(a,b){const R=6371,r=Math.PI/180;const dLa=(b.lat-a.lat)*r,dLo=(b.lon-a.lon)*r;const x=Math.sin(dLa/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLo/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
+
+/* ---------- storage ---------- */
+function save(){try{const copy={...state,stops:state.stops.filter(s=>s.status==='ok').map(s=>{const c={...s};delete c.thumb;delete c.rereading;return c;})};localStorage.setItem(KEY,JSON.stringify(copy));}catch(e){}}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||'null');if(v&&Array.isArray(v.stops))state={...state,...v};}catch(e){}}
+const getKey=()=>{try{return localStorage.getItem(KEY_API)||'';}catch(e){return '';}};
+const setKey=k=>{try{k?localStorage.setItem(KEY_API,k):localStorage.removeItem(KEY_API);}catch(e){}};
+const aiMode=()=>!!getKey();
+
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2400);}
+const isGps=()=>!state.start||!!state.start.gps;
+
+/* =====================================================================
+   OSOITTEIDEN JÄSENNIN (tekstistä → osoite)
+   ===================================================================== */
+const CITY_PREFIX=[
+  [/^(hki|h:ki|hgin|helsinki|hfors|helsingfors)$/i,'00','Helsinki'],
+  [/^(esp|espoo|ebo|esbo)$/i,'02','Espoo'],
+  [/^(vnt|van|vantaa|vanda)$/i,'01','Vantaa'],
+  [/^(tre|tampere|tammerfors)$/i,'33','Tampere'],
+  [/^(tku|turku|åbo)$/i,'20','Turku'],
+  [/^(oulu|uleåborg)$/i,'90','Oulu'],
+  [/^(jkl|jyväskylä)$/i,'40','Jyväskylä'],
+  [/^(lahti|lahtis)$/i,'15','Lahti'],
+  [/^(kpo|kuopio)$/i,'70','Kuopio'],
+  [/^(pori|björneborg)$/i,'28','Pori'],
+  [/^(vaasa|vasa)$/i,'65','Vaasa'],
+  [/^(joensuu)$/i,'80','Joensuu'],
+  [/^(lpr|lappeenranta)$/i,'53','Lappeenranta'],
+  [/^(hml|hämeenlinna)$/i,'13','Hämeenlinna'],
+  [/^(kouvola)$/i,'45','Kouvola'],
+  [/^(seinäjoki)$/i,'60','Seinäjoki'],
+  [/^(rovaniemi)$/i,'96','Rovaniemi'],
+];
+function shorthand(word,digits){
+  for(const [re,pre,city] of CITY_PREFIX){
+    if(re.test(word)){const code=pre+digits;if(code.length>5)return null;return{postcode:code.padEnd(5,'0'),city};}
+  }
+  return null;
+}
+const SUFFIX='(?:katu|tie|kuja|polku|rinne|väylä|kaari|raitti|puisto|mäki|ranta|tori|piha|tanhua|kenttä|aukio|bulevardi|kujanne|ahde|esplanadi|linja|gatan|vägen|gränd|stigen|backen|t\\.|k\\.)';
+const STREET_RE=new RegExp(`(?<![A-Za-zÅÄÖåäöé])([A-Za-zÅÄÖåäöé\\-]*${SUFFIX})\\s*(\\d{1,4}(?:\\s*[-–]\\s*\\d{1,4})?(?:\\s?[A-Ha-h](?![a-zåäö]))?(?:\\s*(?:as\\.?|asunto|lh\\.?)?\\s*\\d{1,4})?)`,'i');
+const PHONE_RE=/(?:\+358[\s-]?|\b0)(?:4\d|50|9|[1-8]\d?)[\s-]?\d{2,4}[\s-]?\d{2,4}(?:[\s-]?\d{1,4})?/;
+const RECIP_RE=/^(vastaanottaja|toimitusosoite|toimitus\s*osoite|saaja|mottagare|leveransadress|toimitetaan|vastaanottajan\s+tiedot)\b\.?\s*:?\s*/i;
+const ORDER_RE=/^(tilaaja|lähettäjä|maksaja|beställare|avsändare|laskutus\w*|tilaajan\s+tiedot)\b\.?\s*:?\s*/i;
+const NOTE_RE=/(ovikoodi|koodi|kerros|klo\s*\d|soita|ovi|portti|summeri|toimitusaika|jätä|ei\s+kotona)/i;
+
+function titleCase(s){if(!s)return s;if(s===s.toUpperCase())return s.toLowerCase().replace(/(^|[\s\-])([a-zåäö])/g,(m,a,b)=>a+b.toUpperCase());return s;}
+function expandStreet(name){
+  let n=titleCase(name.trim());
+  n=n.replace(/t\.$/i,'tie').replace(/k\.$/i,'katu');
+  return n.charAt(0).toUpperCase()+n.slice(1);
+}
+function findPostal(text){
+  let m=text.match(/\b(?:FI-?)?(\d{5})\s+([A-ZÅÄÖa-zåäö][A-Za-zÅÄÖåäö\-]{1,30})/);
+  if(m)return{postcode:m[1],city:titleCase(m[2]),src:m[0]};
+  const re=/\b([A-Za-zÅÄÖåäö:]{2,14})\.?\s+(\d{2,3})\b/g;let k;
+  while((k=re.exec(text))){const r=shorthand(k[1],k[2]);if(r)return{...r,src:k[0],short:true};}
+  m=text.match(/\b(\d{5})\b/);if(m)return{postcode:m[1],city:null,src:m[0]};
+  return null;
+}
+
+function parseCard(text){
+  const lines=String(text||'').split(/\r?\n/).map(l=>l.replace(/\s+/g,' ').trim()).filter(l=>l.length>1);
+  // Rajaa vastaanottajan osuus
+  let seg=lines, segStart=0;
+  const ri=lines.findIndex(l=>RECIP_RE.test(l));
+  const orderIdx=lines.map((l,i)=>ORDER_RE.test(l)?i:-1).filter(i=>i>=0);
+  if(ri>=0){
+    const nextOrder=orderIdx.find(i=>i>ri);
+    seg=lines.slice(ri,nextOrder==null?lines.length:nextOrder);segStart=ri;
+  }else if(orderIdx.length){
+    // poista tilaajalohko (otsikko + enintään 4 riviä)
+    const o=orderIdx[0];const skip=new Set([o]);
+    for(let i=o+1;i<Math.min(lines.length,o+6);i++){skip.add(i);if(findPostal(lines[i]))break;}
+    const rest=lines.filter((_,i)=>!skip.has(i));
+    if(rest.some(l=>STREET_RE.test(l)))seg=rest;
+  }
+  const used=new Set();
+  const segText=seg.join('\n');
+  // Katu
+  let street=null,streetLine=-1;
+  for(let i=0;i<seg.length;i++){const m=seg[i].replace(RECIP_RE,'').match(STREET_RE);if(m){street=(expandStreet(m[1])+' '+m[2].replace(/\s+/g,' ').trim()).trim();streetLine=i;break;}}
+  // Postinumero
+  let postal=null;
+  for(let i=Math.max(0,streetLine);i<seg.length&&!postal;i++){const p=findPostal(seg[i].replace(RECIP_RE,''));if(p){postal={...p,line:i};}}
+  if(!postal){const p=findPostal(segText);if(p)postal=p;}
+  // Puhelin
+  let phone=null;{const m=segText.match(PHONE_RE)||lines.join('\n').match(PHONE_RE);if(m&&m[0].replace(/\D/g,'').length>=7)phone=m[0].trim();}
+  // Nimi
+  let name=null;
+  const first=seg[0]||'';
+  if(ri>=0){const after=first.replace(RECIP_RE,'').trim();if(after&&!/\d/.test(after)&&after.length>2)name=after;}
+  if(!name){
+    const cand=streetLine>0?seg.slice(0,streetLine).reverse():seg;
+    name=(cand.find(l=>!/\d/.test(l)&&!RECIP_RE.test(l)&&!ORDER_RE.test(l)&&l.length>=3&&l.length<=40&&!STREET_RE.test(l)&&/^[A-Za-zÅÄÖåäö]/.test(l))||null);
+  }
+  name=name?titleCase(name.replace(/[:;,.]+$/,'')):null;
+  // Huomiot ja muut tiedot
+  const noteParts=[],details=[];
+  const segSet=new Set(seg.map((_,i)=>i+segStart));
+  lines.forEach((l,i)=>{
+    const inSeg=ri>=0?segSet.has(i):seg.includes(l);
+    const isStreet=inSeg&&street&&STREET_RE.test(l)&&seg.indexOf(l)===streetLine;
+    const isPostal=postal&&postal.src&&l.includes(postal.src)&&inSeg;
+    const isName=name&&l.toLowerCase().includes(name.toLowerCase())&&inSeg;
+    const isPhone=phone&&l.includes(phone)&&inSeg&&l.replace(phone,'').replace(/(puh|tel|p)\.?:?/i,'').trim().length<3;
+    if(isStreet||isPostal||isName||isPhone||RECIP_RE.test(l)&&l.replace(RECIP_RE,'').trim().length<2)return;
+    if(inSeg&&NOTE_RE.test(l)){noteParts.push(l);return;}
+    const kv=l.match(/^([^:]{2,28}):\s*(.+)$/);
+    if(kv)details.push({label:titleCase(kv[1].trim()),value:kv[2].trim()});
+    else details.push({label:'Teksti',value:l});
+  });
+  if(postal&&postal.short)details.unshift({label:'Kortissa luki',value:postal.src});
+  const out={name,street,postcode:postal?postal.postcode:null,city:postal?postal.city:null,phone,note:noteParts.join(' · ')||null,details:details.slice(0,20)};
+  out.conf=(!street||!out.postcode)?'low':'medium';
+  return out;
+}
+function parseFreeAddress(text){
+  // Käsin kirjoitettu osoite: "Mannerheimint. 40 B 12 HKI 60"
+  const p=parseCard(text);
+  if(!p.street){const m=String(text).split(',')[0].trim();p.street=m||null;}
+  return p;
+}
+
+/* =====================================================================
+   KUVIEN LUKU
+   ===================================================================== */
+async function loadImage(file){
+  try{return await createImageBitmap(file);}catch(e){return await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(file);});}
+}
+async function prepare(file){
+  const src=await loadImage(file);
+  const w=src.width,h=src.height,k=Math.min(1,2400/Math.max(w,h));
+  const c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+  c.getContext('2d').drawImage(src,0,0,c.width,c.height);
+  const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',0.92));
+  const t=document.createElement('canvas');const tk=Math.min(1,120/Math.max(w,h));t.width=Math.round(w*tk);t.height=Math.round(h*tk);t.getContext('2d').drawImage(src,0,0,t.width,t.height);
+  // OCR:lle harmaasävy + kontrasti
+  const o=document.createElement('canvas');const ok=Math.min(2,Math.max(1,1800/Math.max(w,h)))*Math.min(1,2600/Math.max(w,h));
+  o.width=Math.round(w*ok);o.height=Math.round(h*ok);const ctx=o.getContext('2d');ctx.drawImage(src,0,0,o.width,o.height);
+  try{const d=ctx.getImageData(0,0,o.width,o.height),a=d.data;let mn=255,mx=0;const g=new Uint8ClampedArray(a.length/4);
+    for(let i=0,j=0;i<a.length;i+=4,j++){const v=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2];g[j]=v;if(v<mn)mn=v;if(v>mx)mx=v;}
+    const sc=255/Math.max(1,mx-mn);for(let i=0,j=0;i<a.length;i+=4,j++){const v=(g[j]-mn)*sc;a[i]=a[i+1]=a[i+2]=v;}ctx.putImageData(d,0,0);}catch(e){}
+  return{blob,thumb:t.toDataURL('image/jpeg',0.7),ocrCanvas:o};
+}
+
+let tessWorker=null,tessLoading=null;
+async function getTess(onStatus){
+  if(tessWorker)return tessWorker;
+  if(!tessLoading)tessLoading=(async()=>{
+    if(!window.Tesseract){
+      onStatus&&onStatus('Ladataan tekstintunnistusta (vain ensimmäisellä kerralla)…');
+      await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=res;s.onerror=()=>rej(new Error('Tekstintunnistuksen lataus epäonnistui – tarkista nettiyhteys'));document.head.appendChild(s);});
+    }
+    onStatus&&onStatus('Valmistellaan suomen kieltä…');
+    tessWorker=await Tesseract.createWorker(['fin','swe']);
+    return tessWorker;
+  })();
+  try{return await tessLoading;}catch(e){tessLoading=null;throw e;}
+}
+async function ocr(canvas,onStatus){
+  const w=await getTess(onStatus);
+  onStatus&&onStatus('Luetaan korttia…');
+  const r=await w.recognize(canvas);
+  return r.data.text||'';
+}
+
+/* ---------- Claude API (valinnainen) ---------- */
+const READ_RULES=`How to read accurately:
+- Cards may be printed, handwritten, rotated or photographed at an angle. Read the recipient block character by character.
+- Finnish addresses: street + house number, optionally staircase and apartment ("Kauppakatu 5 B 12", "Rinnetie 3 as 4").
+- Postcode is exactly 5 digits before the town. In handwriting watch for 1/7, 3/8, 5/6, 0/6, a/o, ä/a, ö/o; prefer the reading that is a real street in that town.
+- SHORTHAND POSTAL DISTRICTS like "HKI 60", "Esp 20", "Vantaa 30", "Tre 10", "Tku 50" = town postcode prefix + district digits padded with zeros: Helsinki 00 (HKI 60 = 00600 Helsinki, Hki 970 = 00970), Espoo 02 (Esp 20 = 02200), Vantaa 01 (Vantaa 30 = 01300), Kauniainen 02700, Tampere 33 (Tre 10 = 33100), Turku 20, Oulu 90, Jyväskylä 40, Lahti 15, Kuopio 70. Output the full town name and the 5-digit code.
+- Copy names exactly; never invent. Unreadable → null and lower confidence.`;
+const SCHEMA=`{"name":string|null,"street":string|null,"postcode":string|null,"city":string|null,"phone":string|null,"note":string|null,"confidence":"high"|"medium"|"low","details":[{"label":string,"value":string}]}`;
+const DETAIL_RULES=`- note: short delivery instructions, time window, door code or floor.
+- details: EVERYTHING ELSE written on the card (not already in other fields) as label/value pairs with Finnish labels, e.g. Tilausnumero, Toimituspäivä, Toimitusaika, Tuote, Tilaaja, Kortin viesti. If you converted a shorthand address, add {"label":"Kortissa luki","value":"<as written>"}.`;
+function cardPrompt(){return `You are helping a flower delivery driver in Finland. The photo shows one or more delivery cards / order slips. For EACH card extract the DELIVERY (recipient: Vastaanottaja / Toimitusosoite / Saaja) address – never the orderer/sender (Tilaaja / Lähettäjä / Maksaja).
+${areaHint()}
+${READ_RULES}
+${DETAIL_RULES}
+Return JSON only: {"stops":[${SCHEMA}]}. If nothing readable: {"stops":[]}.`;}
+function rereadPrompt(s){return `You are helping a flower delivery driver in Finland. This photo was earlier read as "${[s.name,addrText(s)].filter(Boolean).join(', ')}", which may be wrong. Read it again from scratch, very carefully. If there are several cards, return only the one matching that reading. Recipient address only.
+${areaHint()}
+${READ_RULES}
+${DETAIL_RULES}
+Return JSON only: ${SCHEMA}`;}
+function areaHint(){return !isGps()&&state.start&&state.start.text?`The driver's shop is at "${state.start.text}"; if a card lacks a town, assume that area.`:'All addresses are in Finland.';}
+
+async function blobToB64(blob){const buf=new Uint8Array(await blob.arrayBuffer());let s='';for(let i=0;i<buf.length;i+=0x8000)s+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));return btoa(s);}
+async function askClaude(prompt,blob){
+  const content=[];
+  if(blob)content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:await blobToB64(blob)}});
+  content.push({type:'text',text:prompt});
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:AI_MODEL,max_tokens:2500,messages:[{role:'user',content}]})});
+  if(!r.ok){let msg='';try{msg=(await r.json()).error.message;}catch(e){}
+    if(r.status===401)throw new Error('API-avain ei kelpaa – tarkista se asetuksista (⚙).');
+    if(r.status===429)throw new Error('Liian monta pyyntöä – kokeile hetken päästä.');
+    if(r.status===400&&/credit|balance/i.test(msg))throw new Error('API-tilillä ei ole saldoa.');
+    throw new Error('Tekoälyhaku epäonnistui ('+r.status+')');}
+  const j=await r.json();const t=(j.content||[]).map(c=>c.text||'').join('');
+  const m=t.match(/\{[\s\S]*\}/);if(!m)throw new Error('Vastausta ei voitu lukea');return JSON.parse(m[0]);
+}
+function cleanAI(o){
+  const pc=o.postcode?String(o.postcode).replace(/\s/g,''):null;
+  let conf=o.confidence||'medium';
+  if(!o.street||(pc&&!/^\d{5}$/.test(pc))||!/\d/.test(o.street||''))conf='low';
+  const details=Array.isArray(o.details)?o.details.filter(d=>d&&d.value!=null&&String(d.value).trim()).map(d=>({label:String(d.label||'Tieto').trim(),value:String(d.value).trim()})).slice(0,30):[];
+  return{name:o.name||null,street:o.street||null,postcode:pc,city:o.city||null,phone:o.phone||null,note:o.note||null,details,conf};
+}
+
+/* ---------- jono ---------- */
+const queue=[];let running=0;
+function enqueue(job,max=1){queue.push(job);pump(max);}
+function pump(max){while(running<max&&queue.length){const j=queue.shift();running++;j().finally(()=>{running--;pump(max);});}}
+
+function handleFiles(files){
+  const ai=aiMode();
+  for(const f of files){
+    const ph={id:++uid,status:'reading',msg:'Odottaa…'};
+    state.stops.push(ph);
+    enqueue(async()=>{
+      try{
+        ph.msg='Valmistellaan kuvaa…';render();
+        const {blob,thumb,ocrCanvas}=await prepare(f);ph.thumb=thumb;const imgId=++uid;imgs.set(imgId,blob);ph.imgId=imgId;render();
+        let found=[];
+        if(ai){ph.msg='Tekoäly lukee korttia…';render();
+          const res=await askClaude(cardPrompt(),blob);found=(res&&Array.isArray(res.stops)?res.stops:[]).map(cleanAI);}
+        else{
+          const text=await ocr(ocrCanvas,m=>{ph.msg=m;render();});
+          const p=parseCard(text);p.raw=text;
+          if(p.street||p.postcode||p.name)found=[p];
+          else{Object.assign(ph,{status:'error',err:'Tekstistä ei löytynyt osoitetta. Voit kirjoittaa sen käsin.',raw:text});}
+        }
+        const idx=state.stops.indexOf(ph);if(idx<0)return;
+        if(found.length){
+          const news=found.map(o=>({id:++uid,status:'ok',done:false,thumb,imgId,lat:null,lon:null,...o}));
+          state.stops.splice(idx,1,...news);news.forEach(geocodeLater);
+        }else if(ph.status!=='error'){Object.assign(ph,{status:'error',err:'Kuvasta ei löytynyt osoitetta.'});}
+      }catch(e){Object.assign(ph,{status:'error',err:e.message||'Kortin lukeminen epäonnistui.'});}
+      save();render();
+    },ai?2:1);
+  }
+  render();
+}
+
+async function reread(s){
+  const blob=imgs.get(s.imgId);if(!blob){toast('Kuva ei ole enää tallessa – kuvaa kortti uudelleen');return;}
+  if(!aiMode()){toast('Uudelleenluku tarvitsee API-avaimen (⚙)');return;}
+  s.rereading=true;render();
+  try{const o=await askClaude(rereadPrompt(s),blob);
+    if(o&&(o.street||o.name)){Object.assign(s,cleanAI(o),{lat:null,lon:null});toast('Luettu uudelleen');geocodeLater(s);}
+    else toast('Osoitetta ei löytynyt – muokkaa käsin');
+  }catch(e){toast(e.message||'Lukeminen epäonnistui');}
+  delete s.rereading;save();render();
+}
+
+/* =====================================================================
+   PAIKANNUS (OpenStreetMap Nominatim)
+   ===================================================================== */
+let nomLast=0;const geoCache=new Map();
+async function nominatim(q){
+  q=q.trim();if(!q)return null;
+  if(geoCache.has(q))return geoCache.get(q);
+  const wait=nomLast+1100-Date.now();if(wait>0)await sleep(wait);nomLast=Date.now();
+  const u='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=fi&accept-language=fi&q='+encodeURIComponent(q);
+  const r=await fetch(u,{headers:{'Accept':'application/json'}});
+  if(!r.ok)throw new Error('geo '+r.status);
+  const j=await r.json();const res=j&&j[0]?{lat:+j[0].lat,lon:+j[0].lon,exact:/house|building|residential|address|apartments/.test(j[0].addresstype||j[0].type||'')}:null;
+  geoCache.set(q,res);return res;
+}
+async function geocodeParts(street,postcode,city){
+  const base=street?(street.match(/^(.*?\d+)/)||[null,street])[1]:null;
+  const qs=[];
+  if(base&&(postcode||city))qs.push(`${base}, ${[postcode,city].filter(Boolean).join(' ')}`);
+  if(base&&city)qs.push(`${base}, ${city}`);
+  if(base&&!postcode&&!city)qs.push(base);
+  if(postcode)qs.push(`${postcode} ${city||''}`);
+  if(city)qs.push(city);
+  for(const [k,q] of qs.entries()){try{const r=await nominatim(q);if(r)return{...r,approx:k>=2||!r.exact&&k>0};}catch(e){}}
+  return null;
+}
+const geoQueue=[];let geoRunning=false;
+function geocodeLater(s){s.locating=true;geoQueue.push(s);runGeo();}
+async function runGeo(){
+  if(geoRunning)return;geoRunning=true;
+  while(geoQueue.length){const s=geoQueue.shift();render();
+    const r=await geocodeParts(s.street,s.postcode,s.city);
+    s.locating=false;if(r){s.lat=r.lat;s.lon=r.lon;s.approx=!!r.approx;}else{s.lat=null;s.lon=null;}
+    save();render();}
+  geoRunning=false;
+  if(!state.stops.some(s=>s.status==='reading'))optimize(true);
+}
+async function geocodePlace(text){
+  const p=parseFreeAddress(text);
+  return (await geocodeParts(p.street,p.postcode,p.city))||(await nominatim(text).catch(()=>null));
+}
+
+function getGps(){
+  return new Promise(res=>{
+    if(!navigator.geolocation)return res(null);
+    navigator.geolocation.getCurrentPosition(p=>{gpsPos={lat:p.coords.latitude,lon:p.coords.longitude,t:Date.now()};res(gpsPos);},()=>res(null),{enableHighAccuracy:false,timeout:9000,maximumAge:300000});
+  });
+}
+
+/* =====================================================================
+   REITIN JÄRJESTYS (OSRM-ajomatkat, varalla linnuntie)
+   ===================================================================== */
+async function matrixFor(pts){
+  const n=pts.length;
+  if(n<=100&&n>=2){
+    try{
+      const coords=pts.map(p=>p.lon.toFixed(6)+','+p.lat.toFixed(6)).join(';');
+      const ctl=new AbortController();const to=setTimeout(()=>ctl.abort(),12000);
+      const r=await fetch(`https://router.project-osrm.org/table/v1/driving/${coords}?annotations=distance,duration`,{signal:ctl.signal});clearTimeout(to);
+      const j=await r.json();
+      if(j.code==='Ok'&&j.distances){
+        const D=j.distances.map((row,i)=>row.map((v,k)=>v==null?hav(pts[i],pts[k])*1300:v));
+        const T=j.durations.map((row,i)=>row.map((v,k)=>v==null?hav(pts[i],pts[k])*1300/11:v));
+        return{D,T,road:true};
+      }
+    }catch(e){}
+  }
+  const D=pts.map(a=>pts.map(b=>hav(a,b)*1300));
+  return{D,T:D.map(r=>r.map(v=>v/11)),road:false};
+}
+function pathCost(M,order,s,e){let c=0,prev=s;for(const i of order){if(prev!=null)c+=M[prev][i];prev=i;}if(e!=null&&order.length)c+=M[order[order.length-1]][e];return c;}
+function solve(M,idx,s,e){
+  const nnFrom=(cur,pool)=>{const left=pool.slice(),out=[];while(left.length){let bi=0,bd=Infinity;left.forEach((p,i)=>{const d=M[cur][p];if(d<bd){bd=d;bi=i;}});cur=left.splice(bi,1)[0];out.push(cur);}return out;};
+  const two=o=>{let best=o.slice(),bc=pathCost(M,best,s,e),imp=true,g=0;
+    while(imp&&g++<80){imp=false;for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){const c=best.slice(0,i).concat(best.slice(i,j+1).reverse(),best.slice(j+1));const cc=pathCost(M,c,s,e);if(cc<bc-1e-6){best=c;bc=cc;imp=true;}}}
+    return best;};
+  if(s!=null)return two(nnFrom(s,idx));
+  let best=null,bc=Infinity;
+  for(const f of idx){const o=two([f,...nnFrom(f,idx.filter(x=>x!==f))]);const c=pathCost(M,o,s,e);if(c<bc){bc=c;best=o;}}
+  return best;
+}
+async function startCoords(){
+  if(isGps()){if(gpsPos&&Date.now()-gpsPos.t<300000)return gpsPos;return await getGps();}
+  return hasXY(state.start)?state.start:null;
+}
+const endCoords=()=>state.end&&hasXY(state.end)?state.end:null;
+
+async function optimize(silent){
+  if(optimizing)return;optimizing=true;$('optBtn').disabled=true;$('optBtn').textContent='Järjestetään…';
+  try{
+    const live=state.stops.filter(s=>s.status==='ok');
+    const done=live.filter(s=>s.done),pend=live.filter(s=>!s.done&&hasXY(s)),noxy=live.filter(s=>!s.done&&!hasXY(s));
+    const other=state.stops.filter(s=>s.status!=='ok');
+    if(pend.length<2){if(!silent)toast('Tarvitaan vähintään kaksi paikannettua pysähdystä');await computeRouteInfo();return;}
+    const st=await startCoords(),en=endCoords();
+    const pts=[...(st?[st]:[]),...pend,...(en?[en]:[])];
+    const off=st?1:0,M=await matrixFor(pts);
+    const idx=pend.map((_,i)=>i+off);
+    const order=solve(M.D,idx,st?0:null,en?pts.length-1:null);
+    const sorted=order.map(i=>pts[i]);
+    state.stops=[...done,...sorted,...noxy,...other];
+    routeInfo={km:pathCost(M.D,order,st?0:null,en?pts.length-1:null)/1000,min:pathCost(M.T,order,st?0:null,en?pts.length-1:null)/60,road:M.road,fromGps:!!(st&&isGps())};
+    save();
+    if(!silent)toast(M.road?'Reitti järjestetty ajomatkojen mukaan':'Reitti järjestetty (linnuntie)');
+  }finally{optimizing=false;$('optBtn').textContent='↻ Järjestä reitti';render();}
+}
+async function computeRouteInfo(){
+  const pend=state.stops.filter(s=>s.status==='ok'&&!s.done&&hasXY(s));
+  if(!pend.length){routeInfo=null;return;}
+  const st=isGps()?(gpsPos||null):(hasXY(state.start)?state.start:null),en=endCoords();
+  const pts=[...(st?[st]:[]),...pend,...(en?[en]:[])];if(pts.length<2){routeInfo=null;return;}
+  const M=await matrixFor(pts);const off=st?1:0;const order=pend.map((_,i)=>i+off);
+  routeInfo={km:pathCost(M.D,order,st?0:null,en?pts.length-1:null)/1000,min:pathCost(M.T,order,st?0:null,en?pts.length-1:null)/60,road:M.road,fromGps:!!(st&&isGps())};
+}
+let infoTimer=null;function refreshInfoSoon(){clearTimeout(infoTimer);infoTimer=setTimeout(async()=>{await computeRouteInfo();renderStats();},600);}
+
+/* =====================================================================
+   NÄKYMÄ
+   ===================================================================== */
+function fmtMin(m){m=Math.round(m);return m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min';}
+function renderStats(){
+  const live=state.stops.filter(s=>s.status==='ok');const pend=live.filter(s=>!s.done);
+  $('stats').innerHTML=`<div><b>${pend.length}</b>jäljellä</div><div><b>${live.filter(s=>s.done).length}</b>toimitettu</div>`+
+    (routeInfo&&pend.length?`<div><b>~${routeInfo.km<10?routeInfo.km.toFixed(1):Math.round(routeInfo.km)} km</b>${routeInfo.road?'ajoa ~'+fmtMin(routeInfo.min):'linnuntie'}</div>`:'');
+}
+function render(){
+  const st=state.start,gps=isGps();
+  $('modeBanner').innerHTML=aiMode()?'🤖 Kortit luetaan tekoälyllä (oma API-avain).':'📷 Kortit luetaan puhelimen tekstintunnistuksella. Tulostetut kortit onnistuvat parhaiten. <button class="linkbtn" id="openSettings2">Tarkempi lukeminen →</button>';
+  const os2=$('openSettings2');if(os2)os2.onclick=openSettings;
+  if(document.activeElement!==$('startInput'))$('startInput').value=st?st.text:'';
+  $('gpsChip').classList.toggle('on',gps&&!!st);
+  $('startInfo').textContent=gps
+    ?(!st?'Jos jätät tyhjäksi, reitti alkaa omasta sijainnistasi.':'Reitti alkaa puhelimen sijainnista. Sovellus kysyy lupaa sijaintiin, kun järjestät reitin.')
+    :(hasXY(st)?'✓ Lähtöosoite löytyi kartalta':(st.locating?'Haetaan osoitetta…':'⚠ Osoitetta ei löytynyt kartalta – tarkista kirjoitusasu.'));
+  if(document.activeElement!==$('endInput'))$('endInput').value=state.end?state.end.text:'';
+  $('endInfo').textContent=state.end?(hasXY(state.end)?'✓ Reitti päättyy tähän osoitteeseen.':(state.end.locating?'Haetaan osoitetta…':'⚠ Osoitetta ei löytynyt kartalta – tarkista kirjoitusasu.')):'Jos jätät tyhjäksi, reitti päättyy viimeiseen toimitukseen.';
+
+  const live=state.stops.filter(s=>s.status==='ok');const pend=live.filter(s=>!s.done);
+  const L=$('list');
+  if(!state.stops.length)L.innerHTML='<div class="empty">Ei vielä pysähdyksiä. Kuvaa ensimmäinen osoitekortti yllä olevalla napilla.</div>';
+  else{
+    let n=0;
+    L.innerHTML=state.stops.map((s,i)=>{
+      const th=s.thumb?`<img class="thumb" src="${s.thumb}" alt="" data-photo="${i}">`:'';
+      if(s.status==='reading')return `<div class="stop"><div></div><div class="reading">${th}<span class="spin"></span>${esc(s.msg||'Luetaan korttia…')}</div></div>`;
+      if(s.status==='error')return `<div class="stop"><div><div class="num" style="background:#c46">!</div></div><div class="body" style="padding-right:0">${th}<div class="err">${esc(s.err)}</div><div class="actions"><button data-a="manualFrom" data-i="${i}">Kirjoita käsin</button><button data-a="del" data-i="${i}">Poista</button></div></div></div>`;
+      const label=s.done?'✓':(++n);
+      const loc=s.locating?'<div class="meta"><span class="spin sm"></span> haetaan kartalta…</div>':(!hasXY(s)?'<div class="lowconf">⚠ Osoitetta ei löytynyt kartalta – jää reitin loppuun. Tarkista osoite.</div>':(s.approx?'<div class="meta">≈ Sijainti likimääräinen (postinumeroalue)</div>':''));
+      const gm='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(addrText(s));
+      const p=!s.done;
+      return `<div class="stop${s.done?' done':''}" ${p?`data-pend="1" data-id="${s.id}"`:''}>${p?`<div class="grip" data-drag="1" title="Raahaa järjestääksesi"><div class="num">${label}</div><div class="dots">⠿</div></div>`:`<div><div class="num">${label}</div></div>`}<div class="body">
+        <button class="kebab" data-menu="${s.id}" aria-label="Lisää toimintoja" aria-expanded="${openMenu===s.id}">⋮</button>
+        ${openMenu===s.id?`<div class="menu" role="menu">
+          <button data-a="edit" data-i="${i}" role="menuitem">✎ Muokkaa</button>
+          ${aiMode()&&imgs.has(s.imgId)&&!s.done?`<button data-a="reread" data-i="${i}" role="menuitem">↻ Lue kortti uudelleen</button>`:''}
+          <button data-a="del" data-i="${i}" class="danger" role="menuitem">🗑 Poista</button></div>`:''}
+        ${th}
+        ${s.rereading?'<div class="meta"><span class="spin sm"></span> luetaan korttia uudelleen…</div>':''}
+        ${s.name?`<div class="name">${esc(s.name)}</div>`:''}
+        <div class="addr">${esc(addrText(s)||'(osoite puuttuu)')}</div>
+        ${s.note?`<div class="note">${esc(s.note)}</div>`:''}
+        ${s.phone?`<div class="meta">📞 ${esc(s.phone)} · <a href="tel:${esc(String(s.phone).replace(/[^+\d]/g,''))}">soita</a></div>`:''}
+        ${s.details&&s.details.length?`<dl class="details">${s.details.map(d=>`<dt>${esc(d.label)}</dt><dd>${esc(d.value)}</dd>`).join('')}</dl>`:''}
+        ${s.conf==='low'?'<div class="lowconf">⚠ Epäselvä kortti – tarkista osoite</div>':''}
+        ${loc}
+        <div class="actions"><a class="btn go" href="${gm}" target="_blank" rel="noopener">Navigoi</a><button data-a="done" data-i="${i}">${s.done?'Palauta':'✓ Toimitettu'}</button></div>
+      </div></div>`;
+    }).join('');
+  }
+  renderStats();
+  // Google Maps -linkit
+  const seq=pend.map(addrText).filter(Boolean);
+  const anyDone=live.some(s=>s.done);
+  const firstOrigin=(!gps&&st&&st.text&&!anyDone)?st.text:null;
+  const et=state.end&&state.end.text?state.end.text:null;
+  $('legHint').textContent=(firstOrigin?'Reitti alkaa lähtöosoitteesta. ':'Reitti alkaa siitä, missä puhelin on nyt. ')+(et?'Päätepiste: '+et+'. ':'')+'Google Mapsiin mahtuu yhdelle linkille 10 pysähdystä, joten pidempi reitti jaetaan osiin.';
+  const LG=$('legs');
+  if(!seq.length)LG.innerHTML='<div class="empty" style="padding:8px">Ei ajettavaa.</div>';
+  else{
+    const pts=seq.slice();if(et)pts.push(et);
+    const legs=[];let i=0,origin=firstOrigin;
+    while(i<pts.length){const chunk=pts.slice(i,i+10);legs.push({origin,chunk});origin=chunk[chunk.length-1];i+=10;}
+    LG.innerHTML=legs.map((l,k)=>{
+      const dest=l.chunk[l.chunk.length-1],wps=l.chunk.slice(0,-1);
+      let u='https://www.google.com/maps/dir/?api=1&travelmode=driving&destination='+encodeURIComponent(dest);
+      if(l.origin)u+='&origin='+encodeURIComponent(l.origin);
+      if(wps.length)u+='&waypoints='+encodeURIComponent(wps.join('|'));
+      const from=k*10+1,to=Math.min(seq.length,k*10+l.chunk.length);
+      const lbl=from>to?'paluu päätepisteeseen':`pysähdykset ${from}–${to}`;
+      return `<a class="btn go big" style="font-size:16px;padding:14px" href="${u}" target="_blank" rel="noopener">🗺 ${legs.length>1?`Osa ${k+1}: ${lbl}`:`Avaa koko reitti (${seq.length} pysähdystä)`}</a>`;
+    }).join('');
+  }
+  $('optBtn').disabled=optimizing||pend.filter(hasXY).length<2;
+}
+
+/* ---------- dialogit ---------- */
+function openSheet(html){$('sheet').innerHTML=html;$('ov').classList.remove('hidden');}
+function closeSheet(){$('ov').classList.add('hidden');}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')closeSheet();});
+
+function editStop(s,isNew){
+  const f=(k,l,t='text')=>`<div class="field"><span class="lbl">${l}</span><input type="${t}" id="f_${k}" value="${esc(s[k]||'')}"></div>`;
+  openSheet(`<h2>${isNew?'Lisää pysähdys':'Muokkaa pysähdystä'}</h2>${f('name','Vastaanottaja')}${f('street','Katuosoite')}
+  <div class="row" style="justify-content:stretch;margin:0"><div class="field" style="flex:0 0 38%"><span class="lbl">Postinumero</span><input type="text" inputmode="numeric" id="f_postcode" value="${esc(s.postcode||'')}"></div><div class="field" style="flex:1"><span class="lbl">Kaupunki</span><input type="text" id="f_city" value="${esc(s.city||'')}"></div></div>
+  <div class="hint" style="margin:-4px 0 10px">Voit kirjoittaa myös lyhenteen, esim. postinumeroksi "HKI 60".</div>
+  ${f('phone','Puhelin','tel')}${f('note','Huomio (ovikoodi, aika…)')}
+  <div class="field"><span class="lbl">Muut tiedot (yksi per rivi: Otsikko: arvo)</span><textarea id="f_details" rows="4">${esc((s.details||[]).map(d=>d.label+': '+d.value).join('\n'))}</textarea></div>
+  ${s.raw?`<details class="raw"><summary>Näytä kortista tunnistettu teksti</summary><pre>${esc(s.raw)}</pre></details>`:''}
+  <div class="row"><button id="cancelS">Peruuta</button><button class="go" id="saveS">Tallenna</button></div>`);
+  $('cancelS').onclick=closeSheet;
+  $('saveS').onclick=()=>{
+    const v=k=>$('f_'+k).value.trim()||null;
+    const before=addrText(s);
+    let postcode=v('postcode'),city=v('city');
+    if(postcode&&!/^\d{5}$/.test(postcode)){const p=findPostal(postcode+(city&&!/^\d/.test(postcode)?'':' '));const p2=p||findPostal(postcode);if(p2&&/^\d{5}$/.test(p2.postcode)){postcode=p2.postcode;if(p2.city)city=p2.city;}}
+    const details=$('f_details').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const k=l.indexOf(':');return k>0?{label:l.slice(0,k).trim(),value:l.slice(k+1).trim()}:{label:'Tieto',value:l};});
+    Object.assign(s,{name:v('name'),street:v('street'),postcode,city,phone:v('phone'),note:v('note'),details,conf:'high'});
+    if(isNew){Object.assign(s,{id:++uid,status:'ok',done:false});delete s.err;if(!state.stops.includes(s))state.stops.push(s);}
+    closeSheet();save();render();
+    if(addrText(s)&&(isNew||addrText(s)!==before||!hasXY(s)))geocodeLater(s);
+  };
+  setTimeout(()=>$('f_'+(isNew&&!s.street?'street':'name')).focus(),50);
+}
+function pasteText(){
+  openSheet(`<h2>Liitä kortin teksti</h2><p class="hint" style="margin-top:0">Kopioi teksti esim. Google Lensillä tai iPhonen kameran tekstintunnistuksella ja liitä tähän. Yksi kortti kerrallaan.</p>
+  <textarea id="pasteArea" rows="9" placeholder="Vastaanottaja: Maija Meikäläinen&#10;Mannerheimintie 40 B 12&#10;HKI 60&#10;040 123 4567"></textarea>
+  <div class="row"><button id="pN">Peruuta</button><button class="go" id="pY">Lisää</button></div>`);
+  $('pN').onclick=closeSheet;
+  $('pY').onclick=()=>{const t=$('pasteArea').value;if(!t.trim()){closeSheet();return;}
+    const p=parseCard(t);const s={id:++uid,status:'ok',done:false,lat:null,lon:null,raw:t,...p};
+    state.stops.push(s);closeSheet();save();render();
+    if(!p.street&&!p.postcode){editStop(s,false);toast('Osoitetta ei tunnistettu – täydennä se');}
+    else geocodeLater(s);};
+  setTimeout(()=>$('pasteArea').focus(),50);
+}
+function openSettings(){
+  const k=getKey();
+  openSheet(`<h2>Asetukset</h2>
+  <span class="lbl">Tarkempi lukeminen tekoälyllä (valinnainen)</span>
+  <p class="hint" style="margin-top:0">Ilman avainta kortit luetaan ilmaiseksi puhelimessa. Käsin kirjoitettuihin kortteihin tekoäly on selvästi parempi. Avain hankitaan osoitteesta console.anthropic.com (maksullinen, noin 1–2 senttiä per kortti). Avain tallentuu vain tähän puhelimeen.</p>
+  <div class="field"><input type="password" id="apiKey" placeholder="sk-ant-..." value="${esc(k)}" autocomplete="off"></div>
+  <div class="row" style="justify-content:space-between"><a class="btn" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">Hanki avain ↗</a><span style="flex:1"></span>${k?'<button id="kDel">Poista avain</button>':''}<button class="go" id="kSave">Tallenna</button></div>`);
+  $('kSave').onclick=()=>{setKey($('apiKey').value.trim());closeSheet();render();toast(aiMode()?'Tekoälylukeminen käytössä':'Puhelimen tekstintunnistus käytössä');};
+  if($('kDel'))$('kDel').onclick=()=>{setKey('');closeSheet();render();toast('Avain poistettu');};
+}
+function confirmClear(){
+  openSheet(`<h2>Tyhjennetäänkö kaikki pysähdykset?</h2><p style="color:var(--muted);margin:0">Lähtö- ja päätepiste säilyvät.</p><div class="row"><button id="cN">Peruuta</button><button class="primary" id="cY">Tyhjennä</button></div>`);
+  $('cN').onclick=closeSheet;$('cY').onclick=()=>{state.stops=[];routeInfo=null;closeSheet();save();render();};
+}
+function showPhoto(s){
+  const blob=imgs.get(s.imgId);const src=blob?URL.createObjectURL(blob):s.thumb;if(!src)return;
+  openSheet(`<h2>${esc(s.name||addrText(s)||'Kuva')}</h2><img src="${src}" alt="" style="width:100%;border-radius:10px;border:1px solid var(--line)">${blob?'':'<p class="hint">Alkuperäinen kuva ei ole enää tallessa.</p>'}${s.raw?`<details class="raw"><summary>Tunnistettu teksti</summary><pre>${esc(s.raw)}</pre></details>`:''}<div class="row"><button id="phClose">Sulje</button></div>`);
+  $('phClose').onclick=closeSheet;
+}
+
+async function setPlace(which,text){
+  text=(text||'').trim();
+  const cur=state[which];
+  if(cur&&cur.text===text&&(cur.gps||hasXY(cur)||cur.locating))return;
+  if(!text){state[which]=null;save();render();refreshInfoSoon();return;}
+  if(which==='start'&&isGpsText(text)){state.start={text:GPS_TEXT,gps:true};save();render();refreshInfoSoon();return;}
+  const p={text,lat:null,lon:null,locating:true};state[which]=p;save();render();
+  try{const r=await geocodePlace(text);if(r){p.lat=r.lat;p.lon=r.lon;}}catch(e){}
+  delete p.locating;save();render();refreshInfoSoon();
+}
+
+/* ---------- tapahtumat ---------- */
+$('pickBtn').onclick=()=>$('fileInput').click();
+$('fileInput').onchange=e=>{const fs=[...e.target.files];e.target.value='';if(fs.length)handleFiles(fs);};
+$('manualBtn').onclick=()=>editStop({},true);
+$('pasteBtn').onclick=pasteText;
+$('clearBtn').onclick=confirmClear;
+$('settingsBtn').onclick=openSettings;
+$('optBtn').onclick=()=>optimize(false);
+$('startSave').onclick=()=>setPlace('start',$('startInput').value);
+$('endSave').onclick=()=>setPlace('end',$('endInput').value);
+['start','end'].forEach(w=>{const el=$(w+'Input');
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();setPlace(w,e.target.value);e.target.blur();}});
+  el.addEventListener('change',e=>setPlace(w,e.target.value));});
+$('gpsChip').onclick=()=>{$('startInput').value=GPS_TEXT;setPlace('start',GPS_TEXT);getGps().then(p=>{if(!p)toast('Sijaintia ei saatu – salli sijainti selaimen asetuksista');refreshInfoSoon();});};
+$('copyBtn').onclick=async()=>{
+  const pend=state.stops.filter(s=>s.status==='ok'&&!s.done);
+  const txt=pend.map((s,i)=>`${i+1}. ${s.name?s.name+' – ':''}${addrText(s)}${s.phone?' – '+s.phone:''}${s.note?' ('+s.note+')':''}`).join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('Lista kopioitu');}catch(e){openSheet(`<h2>Osoitelista</h2><textarea rows="10">${esc(txt)}</textarea><div class="row"><button id="cl">Sulje</button></div>`);$('cl').onclick=closeSheet;}
+};
+$('list').addEventListener('click',e=>{
+  const ph=e.target.closest('[data-photo]');if(ph){const s=state.stops[+ph.dataset.photo];if(s)showPhoto(s);return;}
+  const mb=e.target.closest('[data-menu]');if(mb){const id=+mb.dataset.menu;openMenu=openMenu===id?null:id;render();return;}
+  if(openMenu!==null&&e.target.closest('.menu'))openMenu=null;
+  const b=e.target.closest('button[data-a]');if(!b)return;
+  const i=+b.dataset.i,s=state.stops[i],a=b.dataset.a;if(!s)return;
+  if(a==='del'){
+    if(s.status==='error'){state.stops.splice(i,1);}
+    else{render();openSheet(`<h2>Poistetaanko pysähdys?</h2><p style="margin:0;color:var(--muted)">${esc([s.name,addrText(s)].filter(Boolean).join(', '))}</p><div class="row"><button id="dN">Peruuta</button><button class="primary" id="dY">Poista</button></div>`);
+      $('dN').onclick=closeSheet;$('dY').onclick=()=>{const k=state.stops.indexOf(s);if(k>=0)state.stops.splice(k,1);closeSheet();save();render();refreshInfoSoon();};return;}
+  }
+  else if(a==='done'){s.done=!s.done;state.stops.splice(i,1);
+    if(s.done){const fp=state.stops.findIndex(x=>!(x.status==='ok'&&x.done));state.stops.splice(fp<0?state.stops.length:fp,0,s);}
+    else{const lastDone=state.stops.map(x=>x.status==='ok'&&x.done).lastIndexOf(true);state.stops.splice(lastDone+1,0,s);}
+    refreshInfoSoon();}
+  else if(a==='edit'){render();editStop(s,false);return;}
+  else if(a==='reread'){reread(s);return;}
+  else if(a==='manualFrom'){const raw=s.raw;editStop(s,true);if(raw)s.raw=raw;return;}
+  save();render();
+});
+document.addEventListener('click',e=>{if(openMenu!==null&&!e.target.closest('.menu')&&!e.target.closest('[data-menu]')){openMenu=null;render();}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(openMenu!==null){openMenu=null;render();}else closeSheet();}});
+
+/* ---------- raahaus (hiiri + kosketus) ---------- */
+let drag=null;
+$('list').addEventListener('pointerdown',e=>{
+  const g=e.target.closest('[data-drag]');if(!g||drag)return;
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  e.preventDefault();
+  const el=g.closest('.stop');const items=[...$('list').querySelectorAll('.stop[data-pend]')];
+  if(items.length<2)return;
+  const tops=items.map(x=>{const r=x.getBoundingClientRect();return{top:r.top+window.scrollY,h:r.height};});
+  const from=items.indexOf(el);
+  drag={el,items,tops,from,to:from,y0:e.clientY+window.scrollY,lastY:e.clientY,raf:0};
+  try{g.setPointerCapture(e.pointerId);}catch(_){}
+  el.classList.add('dragging');document.body.classList.add('is-dragging');
+  if(navigator.vibrate){try{navigator.vibrate(15);}catch(_){}}
+  autoScroll();
+});
+function dragMove(){
+  if(!drag)return;const {el,items,tops,from}=drag;
+  const dy=(drag.lastY+window.scrollY)-drag.y0;el.style.transform=`translateY(${dy}px)`;
+  const center=tops[from].top+tops[from].h/2+dy;let to=0;
+  for(let k=0;k<items.length;k++){if(k===from)continue;if(tops[k].top+tops[k].h/2<center)to++;}
+  drag.to=to;const h=tops[from].h;
+  items.forEach((x,k)=>{if(k===from)return;let off=0;if(from<to&&k>from&&k<=to)off=-h;else if(to<from&&k>=to&&k<from)off=h;x.style.transform=off?`translateY(${off}px)`:'';});
+}
+function autoScroll(){
+  if(!drag)return;const y=drag.lastY,edge=90,H=window.innerHeight;let v=0;
+  if(y<edge)v=-Math.ceil((edge-y)/6);else if(y>H-edge)v=Math.ceil((y-(H-edge))/6);
+  if(v){window.scrollBy(0,v);dragMove();}drag.raf=requestAnimationFrame(autoScroll);
+}
+$('list').addEventListener('pointermove',e=>{if(!drag)return;e.preventDefault();drag.lastY=e.clientY;dragMove();});
+function endDrag(cancel){
+  if(!drag)return;const {items,from,to}=drag;cancelAnimationFrame(drag.raf);
+  items.forEach(x=>{x.style.transform='';x.classList.remove('dragging');});document.body.classList.remove('is-dragging');drag=null;
+  if(cancel||from===to){render();return;}
+  const ids=items.map(x=>+x.dataset.id);const [m]=ids.splice(from,1);ids.splice(to,0,m);
+  const byId=new Map(state.stops.map(s=>[s.id,s]));const np=ids.map(id=>byId.get(id));let k=0;
+  state.stops=state.stops.map(s=>(s.status==='ok'&&!s.done)?np[k++]:s);
+  save();render();toast(`Siirretty kohtaan ${to+1}`);refreshInfoSoon();
+}
+$('list').addEventListener('pointerup',()=>endDrag(false));
+$('list').addEventListener('pointercancel',()=>endDrag(true));
+$('list').addEventListener('lostpointercapture',()=>{if(drag)endDrag(false);});
+$('list').addEventListener('contextmenu',e=>{if(e.target.closest('[data-drag]'))e.preventDefault();});
+
+/* ---------- käynnistys ---------- */
+load();
+state.stops.forEach(s=>{if(s.status==='ok'&&!hasXY(s)&&addrText(s))geocodeLater(s);});
+['start','end'].forEach(w=>{const p=state[w];if(p&&!p.gps&&!hasXY(p))setPlace(w,p.text);});
+render();refreshInfoSoon();
+
+// testejä varten
+window.__ajoreitti={parseCard,shorthand,findPostal,solve,pathCost};
+})();
+
+</script>
+</body>
+</html>
